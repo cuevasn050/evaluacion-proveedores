@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Evaluación de Proveedores</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="admin.css">
+    <script>
+        // Verificar autenticación antes de cargar la página
+        (function() {
+            const isAuthenticated = localStorage.getItem('adminAuthenticated') === 'true';
+            const authTime = localStorage.getItem('adminAuthTime');
+            
+            // Verificar expiración (24 horas)
+            if (authTime) {
+                const hoursSinceAuth = (Date.now() - parseInt(authTime)) / (1000 * 60 * 60);
+                if (hoursSinceAuth > 24) {
+                    localStorage.removeItem('adminAuthenticated');
+                    localStorage.removeItem('adminAuthTime');
+                    window.location.href = 'login-admin.html';
+                    return;
+                }
+            }
+            
+            if (!isAuthenticated) {
+                window.location.href = 'login-admin.html';
+            }
+        })();
+    </script>
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1>⚙️ Panel de Administración</h1>
+            <p>Gestiona las preguntas, porcentajes y descripciones del sistema de evaluación</p>
+            <div class="admin-actions">
+                <button id="cerrarSesionBtn" class="btn-secondary" style="background: rgba(220, 53, 69, 0.2); border-color: #dc3545;">🚪 Cerrar Sesión</button>
+                <button id="volverBtn" class="btn-secondary">← Volver al Formulario</button>
+            </div>
+        </header>
+
+        <div class="admin-content">
+            <!-- Sección: Información General -->
+            <section class="admin-section">
+                <h2>📝 Información General</h2>
+                <div class="form-group">
+                    <label>Título Principal:</label>
+                    <input type="text" id="tituloPrincipal" placeholder="Evaluación de Proveedores">
+                </div>
+                <div class="form-group">
+                    <label>Descripción de la Evaluación:</label>
+                    <textarea id="descripcionEvaluacion" rows="3" placeholder="Este sistema permite evaluar..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Objetivo:</label>
+                    <textarea id="objetivoEvaluacion" rows="3" placeholder="Medir y mejorar continuamente..."></textarea>
+                </div>
+            </section>
+
+            <!-- Sección: Ítems de PRODUCTO -->
+            <section class="admin-section">
+                <h2>🟦 Ítems de Evaluación - PRODUCTO</h2>
+                <div id="itemsProductoContainer"></div>
+                <button type="button" id="agregarItemProducto" class="btn-add">+ Agregar Ítem</button>
+            </section>
+
+            <!-- Sección: Ítems de SERVICIO -->
+            <section class="admin-section">
+                <h2>🟩 Ítems de Evaluación - SERVICIO</h2>
+                <div id="itemsServicioContainer"></div>
+                <button type="button" id="agregarItemServicio" class="btn-add">+ Agregar Ítem</button>
+            </section>
+
+            <!-- Sección: Gestión de Evaluadores -->
+            <section class="admin-section">
+                <h2>👥 Gestión de Evaluadores</h2>
+                <div class="form-group">
+                    <label>Agregar Nuevo Evaluador:</label>
+                    <div class="add-evaluador-container">
+                        <input type="text" id="nuevoEvaluador" placeholder="Nombre del evaluador">
+                        <button type="button" id="agregarEvaluadorBtn" class="btn-add">+ Agregar Evaluador</button>
+                    </div>
+                </div>
+                <div id="evaluadoresList" class="evaluadores-grid"></div>
+            </section>
+
+            <!-- Sección: Gestión de Proveedores -->
+            <section class="admin-section">
+                <h2>🏢 Gestión de Proveedores</h2>
+                <div class="form-group">
+                    <label>Agregar Nuevo Proveedor:</label>
+                    <div class="add-proveedor-container">
+                        <input type="text" id="nuevoProveedor" placeholder="Nombre del proveedor">
+                        <select id="tipoNuevoProveedor">
+                            <option value="PRODUCTO">PRODUCTO</option>
+                            <option value="SERVICIO">SERVICIO</option>
+                        </select>
+                        <button type="button" id="agregarProveedorBtn" class="btn-add">+ Agregar Proveedor</button>
+                    </div>
+                </div>
+                <div id="proveedoresList" class="proveedores-grid"></div>
+            </section>
+
+            <!-- Sección: Asignación de Proveedores a Evaluadores -->
+            <section class="admin-section">
+                <h2>🔗 Asignar Proveedores a Evaluadores</h2>
+                <p class="section-description">Selecciona un evaluador y asigna sus proveedores correspondientes:</p>
+                <div id="asignacionesContainer" class="asignaciones-container"></div>
+            </section>
+
+            <!-- Sección: Guardar -->
+            <section class="admin-section">
+                <button type="button" id="guardarConfigBtn" class="btn-save">💾 Guardar</button>
+                <div id="mensajeGuardado" class="mensaje-exito" style="display: none;"></div>
+            </section>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Administrador - Evaluación de Proveedores</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        
+        .login-container h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .login-container p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .error-message {
+            color: #dc3545;
+            margin-top: 10px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .btn-volver {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        
+        .btn-volver:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>🔐 Acceso Administrador</h1>
+        <p>Ingrese la contraseña para acceder al panel de administración</p>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" placeholder="Ingrese la contraseña" required autofocus>
+            </div>
+            
+            <button type="submit" class="btn-login">Acceder</button>
+            
+            <div id="errorMessage" class="error-message">Contraseña incorrecta. Intente nuevamente.</div>
+        </form>
+        
+        <a href="index.html" class="btn-volver">← Volver al Formulario</a>
+    </div>
+
+    <script>
+        // Contraseña del administrador (puedes cambiarla)
+        const ADMIN_PASSWORD = 'admin123';
+        
+        // Verificar si ya está autenticado
+        if (localStorage.getItem('adminAuthenticated') === 'true') {
+            window.location.href = 'admin.html';
+        }
+        
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            
+            if (password === ADMIN_PASSWORD) {
+                // Guardar autenticación en localStorage (expira en 24 horas)
+                localStorage.setItem('adminAuthenticated', 'true');
+                localStorage.setItem('adminAuthTime', Date.now().toString());
+                window.location.href = 'admin.html';
+            } else {
+                errorMessage.style.display = 'block';
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
+            }
+        });
+        
+        // Verificar expiración de sesión (24 horas)
+        const authTime = localStorage.getItem('adminAuthTime');
+        if (authTime) {
+            const hoursSinceAuth = (Date.now() - parseInt(authTime)) / (1000 * 60 * 60);
+            if (hoursSinceAuth > 24) {
+                localStorage.removeItem('adminAuthenticated');
+                localStorage.removeItem('adminAuthTime');
+            }
+        }
+    </script>
+</body>
+</html>
+

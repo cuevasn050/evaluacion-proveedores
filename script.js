@@ -1,6 +1,5 @@
-// Asignación de proveedores por evaluador
-// Cada evaluador tiene una lista específica de proveedores asignados
-const asignacionProveedores = {
+// Asignación de proveedores por evaluador (valores por defecto)
+const asignacionProveedoresDefault = {
     'Exequiel Ledezma': {
         PRODUCTO: ['PRODALAM', 'APRO', 'SERVICIOS 23', 'RECOMIN', 'PROSEV', 'TUBIX', 'LET RIVEROS', 'DYFAR'],
         SERVICIO: []
@@ -91,6 +90,24 @@ const asignacionProveedores = {
     }
 };
 
+// Cargar asignación de proveedores desde localStorage o usar valores por defecto
+function cargarAsignacionProveedores() {
+    const configGuardada = localStorage.getItem('configEvaluacion');
+    if (configGuardada) {
+        try {
+            const config = JSON.parse(configGuardada);
+            if (config.asignacionProveedores) {
+                return config.asignacionProveedores;
+            }
+        } catch (e) {
+            console.error('Error al cargar asignación de proveedores:', e);
+        }
+    }
+    return asignacionProveedoresDefault;
+}
+
+const asignacionProveedores = cargarAsignacionProveedores();
+
 // Lista de evaluadores
 const evaluadores = Object.keys(asignacionProveedores);
 
@@ -102,35 +119,113 @@ function obtenerProveedoresPorEvaluador(evaluador, tipo) {
     return asignacionProveedores[evaluador][tipo] || [];
 }
 
-// Ítems de evaluación para PRODUCTO
-const itemsProducto = [
-    { nombre: 'Condiciones Financieras de Pago', ponderacion: 10 },
-    { nombre: 'Información de certificación o implementación respecto a alguna ISO', ponderacion: 4 },
-    { nombre: 'Comunicación fluida con el cliente', ponderacion: 4 },
-    { nombre: 'Reacción frente a nuevos requerimientos', ponderacion: 5 },
-    { nombre: 'Información técnica de los productos (Calidad, Medio Ambiente y Seguridad)', ponderacion: 2 },
-    { nombre: 'Cumplimiento de plazos de entrega, horarios de bodega y documentación', ponderacion: 65 },
-    { nombre: 'Certificación del producto del proveedor', ponderacion: 10 }
-];
+// Cargar configuración desde localStorage o usar valores por defecto
+function cargarConfiguracionEvaluacion() {
+    const guardada = localStorage.getItem('configEvaluacion');
+    if (guardada) {
+        try {
+            return JSON.parse(guardada);
+        } catch (e) {
+            console.error('Error al cargar configuración:', e);
+        }
+    }
+    // Valores por defecto
+    return {
+        titulo: 'Evaluación de Proveedores',
+        descripcion: 'Este sistema permite evaluar el desempeño de nuestros proveedores mediante un proceso estructurado y objetivo, considerando diferentes aspectos según el tipo de proveedor (Producto o Servicio).',
+        objetivo: 'Medir y mejorar continuamente la calidad de nuestros proveedores, asegurando que cumplan con los estándares requeridos en términos de calidad de productos/servicios, cumplimiento de plazos, comunicación y respuesta, y certificaciones y cumplimiento normativo.',
+        itemsProducto: [
+            { nombre: 'Condiciones Financieras de Pago', ponderacion: 10 },
+            { nombre: 'Información de certificación o implementación respecto a alguna ISO', ponderacion: 4 },
+            { nombre: 'Comunicación fluida con el cliente', ponderacion: 4 },
+            { nombre: 'Reacción frente a nuevos requerimientos', ponderacion: 5 },
+            { nombre: 'Información técnica de los productos (Calidad, Medio Ambiente y Seguridad)', ponderacion: 2 },
+            { nombre: 'Cumplimiento de plazos de entrega, horarios de bodega y documentación', ponderacion: 65 },
+            { nombre: 'Certificación del producto del proveedor', ponderacion: 10 }
+        ],
+        itemsServicio: [
+            { nombre: 'Comportamiento seguro durante la prestación del servicio', ponderacion: 10 },
+            { nombre: 'Cumplimiento de la oportunidad en la realización del servicio', ponderacion: 33 },
+            { nombre: 'Calidad del servicio', ponderacion: 33 },
+            { nombre: 'Comunicación fluida con el prestador del servicio', ponderacion: 7 },
+            { nombre: 'Reacción del prestador frente a nuevos requerimientos', ponderacion: 10 },
+            { nombre: 'Publicación del estado en regla de las partes relevantes y otra información relevante para el usuario AURA', ponderacion: 7 }
+        ]
+    };
+}
 
-// Ítems de evaluación para SERVICIO
-const itemsServicio = [
-    { nombre: 'Comportamiento seguro durante la prestación del servicio', ponderacion: 10 },
-    { nombre: 'Cumplimiento de la oportunidad en la realización del servicio', ponderacion: 33 },
-    { nombre: 'Calidad del servicio', ponderacion: 33 },
-    { nombre: 'Comunicación fluida con el prestador del servicio', ponderacion: 7 },
-    { nombre: 'Reacción del prestador frente a nuevos requerimientos', ponderacion: 10 },
-    { nombre: 'Publicación del estado en regla de las partes relevantes y otra información relevante para el usuario AURA', ponderacion: 7 }
-];
+const configEvaluacion = cargarConfiguracionEvaluacion();
+
+// Ítems de evaluación para PRODUCTO (desde configuración)
+const itemsProducto = configEvaluacion.itemsProducto || [];
+
+// Ítems de evaluación para SERVICIO (desde configuración)
+const itemsServicio = configEvaluacion.itemsServicio || [];
 
 // Escala de respuesta
 const escalaRespuesta = [25, 50, 75, 100];
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', function() {
+    actualizarInformacionDesdeConfig();
     inicializarEvaluadores();
     inicializarEventos();
 });
+
+function actualizarInformacionDesdeConfig() {
+    // Actualizar título
+    const titulo = document.getElementById('tituloPrincipal');
+    if (titulo) {
+        titulo.textContent = configEvaluacion.titulo || 'Evaluación de Proveedores';
+    }
+    
+    // Actualizar descripción
+    const descripcion = document.getElementById('descripcionEvaluacion');
+    if (descripcion) {
+        descripcion.textContent = configEvaluacion.descripcion || '';
+    }
+    
+    // Actualizar objetivo
+    const objetivo = document.getElementById('objetivoEvaluacion');
+    if (objetivo) {
+        objetivo.textContent = configEvaluacion.objetivo || '';
+    }
+    
+    // Actualizar lista de criterios dinámicamente
+    actualizarCriteriosEnHTML();
+}
+
+function actualizarCriteriosEnHTML() {
+    // Actualizar criterios de PRODUCTO
+    const ulProducto = document.getElementById('listaProducto');
+    const cantidadProducto = document.getElementById('cantidadProducto');
+    if (ulProducto) {
+        ulProducto.innerHTML = '';
+        itemsProducto.forEach(item => {
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>${item.nombre}</strong> (${item.ponderacion}%)`;
+            ulProducto.appendChild(li);
+        });
+        if (cantidadProducto) {
+            cantidadProducto.textContent = itemsProducto.length;
+        }
+    }
+    
+    // Actualizar criterios de SERVICIO
+    const ulServicio = document.getElementById('listaServicio');
+    const cantidadServicio = document.getElementById('cantidadServicio');
+    if (ulServicio) {
+        ulServicio.innerHTML = '';
+        itemsServicio.forEach(item => {
+            const li = document.createElement('li');
+            li.innerHTML = `<strong>${item.nombre}</strong> (${item.ponderacion}%)`;
+            ulServicio.appendChild(li);
+        });
+        if (cantidadServicio) {
+            cantidadServicio.textContent = itemsServicio.length;
+        }
+    }
+}
 
 function inicializarEvaluadores() {
     const selectEvaluador = document.getElementById('evaluador');
