@@ -503,3 +503,95 @@ async function eliminarEvaluacion(id) {
     }
 }
 
+// ========== AUTENTICACIÓN DE ADMINISTRADOR ==========
+
+// Función para hashear una contraseña usando SHA-256
+async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+}
+
+// Validar contraseña de administrador
+async function validarPasswordAdmin(password) {
+    await waitForSupabase();
+    try {
+        // Hashear la contraseña ingresada
+        const passwordHash = await hashPassword(password);
+        
+        // Obtener el hash almacenado en Supabase
+        const { data, error } = await window.supabaseClient
+            .from('admin_password')
+            .select('password_hash')
+            .order('id', { ascending: false })
+            .limit(1)
+            .single();
+        
+        if (error && error.code !== 'PGRST116') {
+            console.error('Error al validar contraseña:', error);
+            return false;
+        }
+        
+        if (!data) {
+            console.error('No se encontró hash de contraseña en la base de datos');
+            return false;
+        }
+        
+        // Comparar hashes
+        return passwordHash === data.password_hash;
+    } catch (error) {
+        console.error('Error al validar contraseña:', error);
+        return false;
+    }
+}
+
+// Actualizar contraseña de administrador
+async function actualizarPasswordAdmin(nuevaPassword) {
+    await waitForSupabase();
+    try {
+        // Hashear la nueva contraseña
+        const passwordHash = await hashPassword(nuevaPassword);
+        
+        // Verificar si ya existe un registro
+        const { data: existing, error: checkError } = await window.supabaseClient
+            .from('admin_password')
+            .select('id')
+            .order('id', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+        
+        // Si hay error y no es "no rows", lanzar error
+        if (checkError && checkError.code !== 'PGRST116') {
+            throw checkError;
+        }
+        
+        if (existing) {
+            // Actualizar
+            const { error } = await window.supabaseClient
+                .from('admin_password')
+                .update({ 
+                    password_hash: passwordHash,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', existing.id);
+            
+            if (error) throw error;
+        } else {
+            // Insertar
+            const { error } = await window.supabaseClient
+                .from('admin_password')
+                .insert([{ password_hash: passwordHash }]);
+            
+            if (error) throw error;
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('Error al actualizar contraseña:', error);
+        return false;
+    }
+}
+

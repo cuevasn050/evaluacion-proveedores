@@ -116,30 +116,59 @@
         <a href="index.html" class="btn-volver">← Volver al Formulario</a>
     </div>
 
+    <!-- Scripts de Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-service.js"></script>
+    
     <script>
-        // Contraseña del administrador (puedes cambiarla)
-        const ADMIN_PASSWORD = 'admin123';
-        
         // Verificar si ya está autenticado
         if (sessionStorage.getItem('adminAuthenticated') === 'true') {
             window.location.href = 'admin.html';
         }
         
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        // Esperar a que Supabase esté listo
+        async function initLogin() {
+            await waitForSupabase();
+            console.log('✅ Login listo para validar contraseña');
+        }
+        
+        initLogin();
+        
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const password = document.getElementById('password').value;
             const errorMessage = document.getElementById('errorMessage');
+            const submitButton = e.target.querySelector('button[type="submit"]');
             
-            if (password === ADMIN_PASSWORD) {
-                // Guardar autenticación en sessionStorage (se cierra al cerrar la pestaña)
-                sessionStorage.setItem('adminAuthenticated', 'true');
-                sessionStorage.setItem('adminAuthTime', Date.now().toString());
-                window.location.href = 'admin.html';
-            } else {
+            // Deshabilitar botón mientras se valida
+            submitButton.disabled = true;
+            submitButton.textContent = 'Validando...';
+            errorMessage.style.display = 'none';
+            
+            try {
+                // Validar contraseña usando la función de Supabase
+                const esValida = await validarPasswordAdmin(password);
+                
+                if (esValida) {
+                    // Guardar autenticación en sessionStorage (se cierra al cerrar la pestaña)
+                    sessionStorage.setItem('adminAuthenticated', 'true');
+                    sessionStorage.setItem('adminAuthTime', Date.now().toString());
+                    window.location.href = 'admin.html';
+                } else {
+                    errorMessage.style.display = 'block';
+                    document.getElementById('password').value = '';
+                    document.getElementById('password').focus();
+                }
+            } catch (error) {
+                console.error('Error al validar contraseña:', error);
+                errorMessage.textContent = 'Error al validar contraseña. Intente nuevamente.';
                 errorMessage.style.display = 'block';
-                document.getElementById('password').value = '';
-                document.getElementById('password').focus();
+            } finally {
+                // Rehabilitar botón
+                submitButton.disabled = false;
+                submitButton.textContent = 'Acceder';
             }
         });
     </script>

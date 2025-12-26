@@ -40,6 +40,26 @@
         </header>
 
         <div class="admin-content">
+            <!-- Sección: Cambiar Contraseña -->
+            <section class="admin-section" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%); border: 2px solid rgba(102, 126, 234, 0.3);">
+                <h2>🔐 Cambiar Contraseña de Administrador</h2>
+                <p class="section-description" style="color: #666; margin-bottom: 20px;">Actualiza la contraseña de acceso al panel de administración</p>
+                <div class="form-group">
+                    <label>Contraseña Actual:</label>
+                    <input type="password" id="passwordActual" placeholder="Ingrese su contraseña actual">
+                </div>
+                <div class="form-group">
+                    <label>Nueva Contraseña:</label>
+                    <input type="password" id="nuevaPassword" placeholder="Ingrese la nueva contraseña">
+                </div>
+                <div class="form-group">
+                    <label>Confirmar Nueva Contraseña:</label>
+                    <input type="password" id="confirmarPassword" placeholder="Confirme la nueva contraseña">
+                </div>
+                <button type="button" id="cambiarPasswordBtn" class="btn-add" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">🔑 Cambiar Contraseña</button>
+                <div id="mensajePassword" class="mensaje-exito" style="display: none; margin-top: 15px;"></div>
+            </section>
+
             <!-- Sección: Información General -->
             <section class="admin-section">
                 <h2>📝 Información General</h2>

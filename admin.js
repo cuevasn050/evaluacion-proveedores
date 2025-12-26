@@ -930,6 +930,98 @@ function inicializarEventos() {
             sessionStorage.removeItem('adminAuthTime');
             window.location.href = 'index.html';
         };
+    }
+
+    // Botón para cambiar contraseña
+    const btnCambiarPassword = document.getElementById('cambiarPasswordBtn');
+    if (btnCambiarPassword) {
+        btnCambiarPassword.onclick = async function() {
+            const passwordActual = document.getElementById('passwordActual').value;
+            const nuevaPassword = document.getElementById('nuevaPassword').value;
+            const confirmarPassword = document.getElementById('confirmarPassword').value;
+            const mensajePassword = document.getElementById('mensajePassword');
+
+            // Validaciones
+            if (!passwordActual || !nuevaPassword || !confirmarPassword) {
+                mensajePassword.textContent = '❌ Por favor complete todos los campos';
+                mensajePassword.style.display = 'block';
+                mensajePassword.style.background = 'rgba(220, 53, 69, 0.1)';
+                mensajePassword.style.color = '#dc3545';
+                mensajePassword.style.borderColor = '#dc3545';
+                return;
+            }
+
+            if (nuevaPassword !== confirmarPassword) {
+                mensajePassword.textContent = '❌ Las contraseñas nuevas no coinciden';
+                mensajePassword.style.display = 'block';
+                mensajePassword.style.background = 'rgba(220, 53, 69, 0.1)';
+                mensajePassword.style.color = '#dc3545';
+                mensajePassword.style.borderColor = '#dc3545';
+                return;
+            }
+
+            if (nuevaPassword.length < 6) {
+                mensajePassword.textContent = '❌ La nueva contraseña debe tener al menos 6 caracteres';
+                mensajePassword.style.display = 'block';
+                mensajePassword.style.background = 'rgba(220, 53, 69, 0.1)';
+                mensajePassword.style.color = '#dc3545';
+                mensajePassword.style.borderColor = '#dc3545';
+                return;
+            }
+
+            // Deshabilitar botón mientras se procesa
+            btnCambiarPassword.disabled = true;
+            btnCambiarPassword.textContent = '⏳ Cambiando...';
+
+            try {
+                // Validar contraseña actual
+                const esValida = await validarPasswordAdmin(passwordActual);
+                
+                if (!esValida) {
+                    mensajePassword.textContent = '❌ La contraseña actual es incorrecta';
+                    mensajePassword.style.display = 'block';
+                    mensajePassword.style.background = 'rgba(220, 53, 69, 0.1)';
+                    mensajePassword.style.color = '#dc3545';
+                    mensajePassword.style.borderColor = '#dc3545';
+                    document.getElementById('passwordActual').value = '';
+                    document.getElementById('passwordActual').focus();
+                    return;
+                }
+
+                // Actualizar contraseña
+                const resultado = await actualizarPasswordAdmin(nuevaPassword);
+                
+                if (resultado) {
+                    mensajePassword.textContent = '✅ Contraseña actualizada correctamente. Deberá usar la nueva contraseña en el próximo inicio de sesión.';
+                    mensajePassword.style.display = 'block';
+                    mensajePassword.style.background = 'rgba(40, 167, 69, 0.1)';
+                    mensajePassword.style.color = '#28a745';
+                    mensajePassword.style.borderColor = '#28a745';
+                    
+                    // Limpiar campos
+                    document.getElementById('passwordActual').value = '';
+                    document.getElementById('nuevaPassword').value = '';
+                    document.getElementById('confirmarPassword').value = '';
+                } else {
+                    mensajePassword.textContent = '❌ Error al actualizar la contraseña. Intente nuevamente.';
+                    mensajePassword.style.display = 'block';
+                    mensajePassword.style.background = 'rgba(220, 53, 69, 0.1)';
+                    mensajePassword.style.color = '#dc3545';
+                    mensajePassword.style.borderColor = '#dc3545';
+                }
+            } catch (error) {
+                console.error('Error al cambiar contraseña:', error);
+                mensajePassword.textContent = '❌ Error al cambiar la contraseña. Intente nuevamente.';
+                mensajePassword.style.display = 'block';
+                mensajePassword.style.background = 'rgba(220, 53, 69, 0.1)';
+                mensajePassword.style.color = '#dc3545';
+                mensajePassword.style.borderColor = '#dc3545';
+            } finally {
+                // Rehabilitar botón
+                btnCambiarPassword.disabled = false;
+                btnCambiarPassword.textContent = '🔑 Cambiar Contraseña';
+            }
+        };
     } else {
         console.error('Botón volver NO encontrado');
     }
