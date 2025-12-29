@@ -291,11 +291,19 @@ async function inicializarFormulario() {
             fechaInicioInput.max = fechaMaxAnio;
             // Separar fecha y hora si vienen juntas
             if (configuracion.fechaInicioEncuesta) {
-                const fechaHoraInicio = new Date(configuracion.fechaInicioEncuesta);
-                fechaInicioInput.value = fechaHoraInicio.toISOString().split('T')[0];
+                // Extraer fecha directamente de la cadena para evitar problemas de zona horaria
+                const fechaHoraStr = configuracion.fechaInicioEncuesta;
+                // Formato esperado: YYYY-MM-DDTHH:MM:SS o YYYY-MM-DDTHH:MM:SS.000Z
+                const fechaParte = fechaHoraStr.split('T')[0]; // Extrae YYYY-MM-DD
+                fechaInicioInput.value = fechaParte;
                 if (horaInicioInput) {
-                    const hora = fechaHoraInicio.toTimeString().split(' ')[0].substring(0, 5);
-                    horaInicioInput.value = hora;
+                    // Extraer hora de la parte después de 'T'
+                    const horaParte = fechaHoraStr.split('T')[1];
+                    if (horaParte) {
+                        // Formato: HH:MM:SS o HH:MM:SS.000Z
+                        const hora = horaParte.split(':').slice(0, 2).join(':'); // Toma solo HH:MM
+                        horaInicioInput.value = hora;
+                    }
                 }
             }
         }
@@ -304,11 +312,19 @@ async function inicializarFormulario() {
             fechaFinInput.max = fechaMaxAnio;
             // Separar fecha y hora si vienen juntas
             if (configuracion.fechaFinEncuesta) {
-                const fechaHoraFin = new Date(configuracion.fechaFinEncuesta);
-                fechaFinInput.value = fechaHoraFin.toISOString().split('T')[0];
+                // Extraer fecha directamente de la cadena para evitar problemas de zona horaria
+                const fechaHoraStr = configuracion.fechaFinEncuesta;
+                // Formato esperado: YYYY-MM-DDTHH:MM:SS o YYYY-MM-DDTHH:MM:SS.000Z
+                const fechaParte = fechaHoraStr.split('T')[0]; // Extrae YYYY-MM-DD
+                fechaFinInput.value = fechaParte;
                 if (horaFinInput) {
-                    const hora = fechaHoraFin.toTimeString().split(' ')[0].substring(0, 5);
-                    horaFinInput.value = hora;
+                    // Extraer hora de la parte después de 'T'
+                    const horaParte = fechaHoraStr.split('T')[1];
+                    if (horaParte) {
+                        // Formato: HH:MM:SS o HH:MM:SS.000Z
+                        const hora = horaParte.split(':').slice(0, 2).join(':'); // Toma solo HH:MM
+                        horaFinInput.value = hora;
+                    }
                 }
             }
             // Establecer fecha mínima basada en fecha de inicio si existe
