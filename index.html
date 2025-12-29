@@ -16,144 +16,203 @@
             <h1 id="tituloPrincipal">Evaluación de Proveedores</h1>
         </header>
 
-        <!-- Sección Informativa -->
-        <section class="info-section">
-            <div class="info-content">
-                <h2>📋 ¿Qué es esta evaluación?</h2>
-                <p id="descripcionEvaluacion">Este sistema permite evaluar el desempeño de nuestros proveedores mediante un proceso estructurado y objetivo, considerando diferentes aspectos según el tipo de proveedor (Producto o Servicio).</p>
-                
-                <h3>🎯 Objetivo</h3>
-                <p id="objetivoEvaluacion">Medir y mejorar continuamente la calidad de nuestros proveedores, asegurando que cumplan con los estándares requeridos en términos de:</p>
-                <ul>
-                    <li>Calidad de productos/servicios</li>
-                    <li>Cumplimiento de plazos</li>
-                    <li>Comunicación y respuesta</li>
-                    <li>Certificaciones y cumplimiento normativo</li>
-                </ul>
-
-                <h3>📊 ¿Cómo funciona la evaluación?</h3>
-                <div class="process-steps">
-                    <div class="step">
-                        <div class="step-number">1</div>
-                        <div class="step-content">
-                            <strong>Selección del Evaluador</strong>
-                            <p>Cada evaluador tiene asignados proveedores específicos según su área de responsabilidad.</p>
-                        </div>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">2</div>
-                        <div class="step-content">
-                            <strong>Tipo de Proveedor</strong>
-                            <p>Selecciona si el proveedor es de <strong>PRODUCTO</strong> o <strong>SERVICIO</strong> ya que cada tipo tiene criterios de evaluación diferentes.</p>
-                        </div>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">3</div>
-                        <div class="step-content">
-                            <strong>Evaluación por Ítems</strong>
-                            <p>Cada ítem se califica con: <strong>25%</strong> <strong>50%</strong> <strong>75%</strong> o <strong>100%</strong> según el cumplimiento observado.</p>
-                        </div>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">4</div>
-                        <div class="step-content">
-                            <strong>Cálculo Automático</strong>
-                            <p>El sistema calcula automáticamente el resultado final ponderado, considerando la importancia de cada ítem.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <h3>📈 Criterios de Evaluación</h3>
-                
-                <div class="criteria-box" id="criteriaProducto">
-                    <h4>🟦 Proveedores de PRODUCTO</h4>
-                    <p id="textoProducto">Se evalúan <span id="cantidadProducto">7</span> aspectos con las siguientes ponderaciones:</p>
-                    <ul id="listaProducto">
-                        <!-- Se llena dinámicamente desde la configuración -->
-                    </ul>
-                </div>
-
-                <div class="criteria-box" id="criteriaServicio">
-                    <h4>🟩 Proveedores de SERVICIO</h4>
-                    <p id="textoServicio">Se evalúan <span id="cantidadServicio">6</span> aspectos con las siguientes ponderaciones:</p>
-                    <ul id="listaServicio">
-                        <!-- Se llena dinámicamente desde la configuración -->
-                    </ul>
-                </div>
-
-                <div class="info-note">
-                    <strong>⚠️ Importante:</strong> Cada evaluador solo puede evaluar a los proveedores que tiene asignados. Una vez evaluado un proveedor, no aparecerá nuevamente en la lista hasta que se elimine la evaluación anterior.
-                </div>
+        <!-- Indicador de Progreso -->
+        <div class="progress-indicator" id="progressIndicator" style="display: none;">
+            <div class="progress-step active" data-step="0">
+                <div class="progress-step-number">1</div>
+                <div class="progress-step-label">Información</div>
             </div>
-        </section>
+            <div class="progress-step" data-step="1">
+                <div class="progress-step-number">2</div>
+                <div class="progress-step-label">Datos Iniciales</div>
+            </div>
+            <div class="progress-step" data-step="2">
+                <div class="progress-step-number">3</div>
+                <div class="progress-step-label">Proveedor</div>
+            </div>
+            <div class="progress-step" data-step="3">
+                <div class="progress-step-number">4</div>
+                <div class="progress-step-label">Evaluación</div>
+            </div>
+            <div class="progress-step" data-step="4">
+                <div class="progress-step-number">5</div>
+                <div class="progress-step-label">Resultado</div>
+            </div>
+        </div>
+
+        <!-- Paso 0: Información -->
+        <div class="form-step active" id="step0" data-step="0">
+            <section class="info-section">
+                <div class="info-content">
+                    <h2>📋 ¿Qué es esta evaluación?</h2>
+                    <p id="descripcionEvaluacion">Este sistema permite evaluar el desempeño de nuestros proveedores mediante un proceso estructurado y objetivo, considerando diferentes aspectos según el tipo de proveedor (Producto o Servicio).</p>
+                    
+                    <h3>🎯 Objetivo</h3>
+                    <p id="objetivoEvaluacion">Medir y mejorar continuamente la calidad de nuestros proveedores, asegurando que cumplan con los estándares requeridos en términos de:</p>
+                    <ul>
+                        <li>Calidad de productos/servicios</li>
+                        <li>Cumplimiento de plazos</li>
+                        <li>Comunicación y respuesta</li>
+                        <li>Certificaciones y cumplimiento normativo</li>
+                    </ul>
+
+                    <h3>📊 ¿Cómo funciona la evaluación?</h3>
+                    <div class="process-steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <strong>Selección del Evaluador</strong>
+                                <p>Cada evaluador tiene asignados proveedores específicos según su área de responsabilidad.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <strong>Tipo de Proveedor</strong>
+                                <p>Selecciona si el proveedor es de <strong>PRODUCTO</strong> o <strong>SERVICIO</strong> ya que cada tipo tiene criterios de evaluación diferentes.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <strong>Evaluación por Ítems</strong>
+                                <p>Cada ítem se califica con: <strong>25%</strong> <strong>50%</strong> <strong>75%</strong> o <strong>100%</strong> según el cumplimiento observado.</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <strong>Cálculo Automático</strong>
+                                <p>El sistema calcula automáticamente el resultado final ponderado, considerando la importancia de cada ítem.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>📈 Criterios de Evaluación</h3>
+                    
+                    <div class="criteria-box" id="criteriaProducto">
+                        <h4>🟦 Proveedores de PRODUCTO</h4>
+                        <p id="textoProducto">Se evalúan <span id="cantidadProducto">7</span> aspectos con las siguientes ponderaciones:</p>
+                        <ul id="listaProducto">
+                            <!-- Se llena dinámicamente desde la configuración -->
+                        </ul>
+                    </div>
+
+                    <div class="criteria-box" id="criteriaServicio">
+                        <h4>🟩 Proveedores de SERVICIO</h4>
+                        <p id="textoServicio">Se evalúan <span id="cantidadServicio">6</span> aspectos con las siguientes ponderaciones:</p>
+                        <ul id="listaServicio">
+                            <!-- Se llena dinámicamente desde la configuración -->
+                        </ul>
+                    </div>
+
+                    <div class="info-note">
+                        <strong>⚠️ Importante:</strong> Cada evaluador solo puede evaluar a los proveedores que tiene asignados. Una vez evaluado un proveedor, no aparecerá nuevamente en la lista hasta que se elimine la evaluación anterior.
+                    </div>
+                </div>
+            </section>
+            <div class="step-navigation">
+                <button type="button" class="btn-next" onclick="siguientePaso()">Comenzar →</button>
+            </div>
+        </div>
 
         <form id="evaluationForm">
-            <!-- Sección 1: Evaluador -->
-            <section class="form-section">
-                <h2>1. Seleccione el Evaluador</h2>
-                <select id="evaluador" required>
-                    <option value="">-- Seleccione un evaluador --</option>
-                </select>
-            </section>
+            <!-- Paso 1: Evaluador, Fecha y Tipo -->
+            <div class="form-step" id="step1" data-step="1">
+                <section class="form-section">
+                    <h2>1. Seleccione el Evaluador</h2>
+                    <select id="evaluador" required>
+                        <option value="">-- Seleccione un evaluador --</option>
+                    </select>
+                </section>
 
-            <!-- Sección 1.5: Fecha de Evaluación -->
-            <section class="form-section">
-                <h2>1.5. Fecha de Evaluación</h2>
-                <input type="date" id="anioEvaluacion" required style="width: 100%; padding: 12px; border: 2px solid #667eea; border-radius: 8px; font-size: 1rem;">
-                <small style="color: #666; display: block; margin-top: 5px;">Seleccione la fecha para la cual está realizando la evaluación (esta fecha se guardará en la base de datos)</small>
-            </section>
+                <section class="form-section">
+                    <h2>2. Fecha de Evaluación</h2>
+                    <input type="date" id="anioEvaluacion" required>
+                    <small>Seleccione la fecha para la cual está realizando la evaluación (esta fecha se guardará en la base de datos)</small>
+                </section>
 
-            <!-- Sección 2: Tipo de Proveedor -->
-            <section class="form-section">
-                <h2>2. Tipo de Proveedor</h2>
-                <div class="radio-group">
-                    <label>
-                        <input type="radio" name="tipoProveedor" value="PRODUCTO" required>
-                        <span>PRODUCTO</span>
-                    </label>
-                    <label>
-                        <input type="radio" name="tipoProveedor" value="SERVICIO" required>
-                        <span>SERVICIO</span>
-                    </label>
+                <section class="form-section">
+                    <h2>3. Tipo de Proveedor</h2>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="tipoProveedor" value="PRODUCTO" required>
+                            <span>PRODUCTO</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="tipoProveedor" value="SERVICIO" required>
+                            <span>SERVICIO</span>
+                        </label>
+                    </div>
+                </section>
+                <div class="step-navigation">
+                    <button type="button" class="btn-prev" onclick="anteriorPaso()">← Anterior</button>
+                    <button type="button" class="btn-next" onclick="siguientePaso()">Siguiente →</button>
                 </div>
-            </section>
+            </div>
 
-            <!-- Sección 3: Proveedor -->
-            <section class="form-section">
-                <h2>3. Seleccione el Proveedor</h2>
-                <select id="proveedor" required>
-                    <option value="">-- Primero seleccione el tipo de proveedor --</option>
-                </select>
-            </section>
+            <!-- Paso 2: Proveedor y Correo -->
+            <div class="form-step" id="step2" data-step="2">
+                <section class="form-section">
+                    <h2>4. Seleccione el Proveedor</h2>
+                    <select id="proveedor" required>
+                        <option value="">-- Primero seleccione el tipo de proveedor --</option>
+                    </select>
+                </section>
 
-            <!-- Sección 3.5: Correo del Proveedor -->
-            <section class="form-section" id="correoSection" style="display: none;">
-                <h2>3.5. Correo Electrónico del Proveedor</h2>
-                <input type="email" id="correoProveedor" placeholder="ejemplo@proveedor.com" required>
-                <small style="color: #666; display: block; margin-top: 5px;">Ingrese el correo electrónico del proveedor para enviar la evaluación</small>
-            </section>
-
-            <!-- Sección 4: Ítems de Evaluación -->
-            <section class="form-section" id="itemsSection" style="display: none;">
-                <h2 id="itemsTitle">4. Ítems de Evaluación</h2>
-                <div id="itemsContainer"></div>
-            </section>
-
-            <!-- Resultado Final -->
-            <section class="form-section" id="resultSection" style="display: none;">
-                <h2>Resultado Final</h2>
-                <div class="result-box">
-                    <div class="result-label">Resultado Ponderado:</div>
-                    <div class="result-value" id="resultadoFinal">0%</div>
+                <section class="form-section" id="correoSection" style="display: none;">
+                    <h2>5. Correo Electrónico del Proveedor</h2>
+                    <input type="email" id="correoProveedor" placeholder="ejemplo@proveedor.com" required>
+                    <small>Ingrese el correo electrónico del proveedor para enviar la evaluación</small>
+                </section>
+                <div class="step-navigation">
+                    <button type="button" class="btn-prev" onclick="anteriorPaso()">← Anterior</button>
+                    <button type="button" class="btn-next" onclick="siguientePaso()">Siguiente →</button>
                 </div>
-            </section>
+            </div>
 
-            <!-- Botones -->
-            <div class="button-group">
-                <button type="submit" id="guardarBtn"><span>💾 Guardar Evaluación</span></button>
-                <button type="button" id="limpiarBtn"><span>🗑️ Limpiar Formulario</span></button>
+            <!-- Paso 3: Ítems de Evaluación -->
+            <div class="form-step" id="step3" data-step="3">
+                <section class="form-section" id="itemsSection" style="display: none;">
+                    <h2 id="itemsTitle">6. Ítems de Evaluación</h2>
+                    <div id="itemsContainer"></div>
+                </section>
+                <div class="step-navigation">
+                    <button type="button" class="btn-prev" onclick="anteriorPaso()">← Anterior</button>
+                    <button type="button" class="btn-next" onclick="siguientePaso()">Siguiente →</button>
+                </div>
+            </div>
+
+            <!-- Paso 4: Resultado y Guardar -->
+            <div class="form-step" id="step4" data-step="4">
+                <section class="form-section" id="resultSection">
+                    <h2>Resultado Final</h2>
+                    <div class="result-box">
+                        <div class="result-label">Resultado Ponderado:</div>
+                        <div class="result-value" id="resultadoFinal">0%</div>
+                    </div>
+                </section>
+                <div class="step-navigation">
+                    <button type="submit" id="guardarBtn" class="btn-save">💾 Guardar Evaluación</button>
+                    <button type="button" id="limpiarBtn" class="btn-clear">🗑️ Limpiar</button>
+                </div>
             </div>
         </form>
+    </div>
+
+    <!-- Modal de éxito personalizado -->
+    <div id="successModal" class="success-modal">
+        <div class="success-modal-content">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <path d="M8 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h2>¡Éxito!</h2>
+            <p>Su evaluación ha sido enviada</p>
+            <button class="success-btn" onclick="cerrarModalExito()">Aceptar</button>
+        </div>
     </div>
 
     <script src="js/script.js"></script>

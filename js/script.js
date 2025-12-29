@@ -137,24 +137,215 @@ async function cargarConfiguracionEvaluacionLocal() {
 // Escala de respuesta
 const escalaRespuesta = [25, 50, 75, 100];
 
+// Sistema de navegación por pasos
+let pasoActual = 0;
+const totalPasos = 5;
+
+function mostrarPaso(paso) {
+    // Ocultar todos los pasos
+    document.querySelectorAll('.form-step').forEach(step => {
+        step.classList.remove('active');
+    });
+    
+    // Mostrar el paso actual
+    const stepElement = document.getElementById(`step${paso}`);
+    if (stepElement) {
+        stepElement.classList.add('active');
+    }
+    
+    // Si estamos en el paso 4, asegurar que solo se muestre el resultado
+    if (paso === 4) {
+        // Calcular resultado si aún no se ha calculado
+        calcularResultado();
+        const resultSection = document.getElementById('resultSection');
+        if (resultSection) {
+            resultSection.style.display = 'block';
+        }
+        // Ocultar otros elementos del formulario que no deben verse
+        const itemsSection = document.getElementById('itemsSection');
+        if (itemsSection) {
+            itemsSection.style.display = 'none';
+        }
+    }
+    
+    // Actualizar indicador de progreso
+    document.querySelectorAll('.progress-step').forEach((step, index) => {
+        step.classList.remove('active', 'completed');
+        if (index < paso) {
+            step.classList.add('completed');
+        } else if (index === paso) {
+            step.classList.add('active');
+        }
+    });
+    
+    // Mostrar/ocultar indicador de progreso
+    const progressIndicator = document.getElementById('progressIndicator');
+    if (progressIndicator) {
+        if (paso === 0) {
+            progressIndicator.style.display = 'none';
+        } else {
+            progressIndicator.style.display = 'flex';
+        }
+    }
+    
+    pasoActual = paso;
+}
+
+function siguientePaso() {
+    // Validar paso actual antes de avanzar
+    if (!validarPasoActual()) {
+        return;
+    }
+    
+    if (pasoActual < totalPasos - 1) {
+        const siguiente = pasoActual + 1;
+        
+        // Si estamos avanzando al paso 2, actualizar proveedores
+        if (pasoActual === 1) {
+            actualizarProveedores().then(() => {
+                mostrarPaso(siguiente);
+            });
+            return;
+        }
+        
+        // Si estamos avanzando al paso 3, mostrar items y correo
+        if (pasoActual === 2) {
+            mostrarItemsEvaluacion();
+            mostrarCampoCorreo();
+        }
+        
+        // Si estamos avanzando al paso 4, calcular resultado y mostrar
+        if (pasoActual === 3) {
+            calcularResultado();
+            // Asegurar que el resultado se muestre
+            const resultSection = document.getElementById('resultSection');
+            if (resultSection) {
+                resultSection.style.display = 'block';
+            }
+        }
+        
+        mostrarPaso(siguiente);
+    }
+}
+
+function anteriorPaso() {
+    if (pasoActual > 0) {
+        mostrarPaso(pasoActual - 1);
+    }
+}
+
+// Hacer funciones globales inmediatamente (antes de DOMContentLoaded)
+window.siguientePaso = siguientePaso;
+window.anteriorPaso = anteriorPaso;
+
+function validarPasoActual() {
+    // Paso 0 no requiere validación
+    if (pasoActual === 0) {
+        return true;
+    }
+    
+    switch(pasoActual) {
+        case 1:
+            const evaluador = document.getElementById('evaluador').value;
+            const fecha = document.getElementById('anioEvaluacion').value;
+            const tipoProveedor = document.querySelector('input[name="tipoProveedor"]:checked');
+            
+            if (!evaluador) {
+                alert('Por favor seleccione un evaluador.');
+                return false;
+            }
+            if (!fecha) {
+                alert('Por favor seleccione una fecha de evaluación.');
+                return false;
+            }
+            if (!tipoProveedor) {
+                alert('Por favor seleccione un tipo de proveedor.');
+                return false;
+            }
+            return true;
+            
+        case 2:
+            const proveedor = document.getElementById('proveedor').value;
+            const correo = document.getElementById('correoProveedor').value;
+            
+            if (!proveedor) {
+                alert('Por favor seleccione un proveedor.');
+                return false;
+            }
+            if (!correo) {
+                alert('Por favor ingrese el correo electrónico del proveedor.');
+                return false;
+            }
+            return true;
+            
+        case 3:
+            const tipoProveedorCheck = document.querySelector('input[name="tipoProveedor"]:checked');
+            if (!tipoProveedorCheck) return true;
+            
+            const items = tipoProveedorCheck.value === 'PRODUCTO' ? itemsProducto : itemsServicio;
+            let todosCompletos = true;
+            
+            items.forEach((item, index) => {
+                const respuesta = document.querySelector(`input[name="item_${index}"]:checked`);
+                if (!respuesta) {
+                    todosCompletos = false;
+                }
+            });
+            
+            if (!todosCompletos) {
+                alert('Por favor responda todas las preguntas antes de continuar.');
+                return false;
+            }
+            return true;
+            
+        default:
+            return true;
+    }
+}
+
 // Inicializar año actual por defecto
 document.addEventListener('DOMContentLoaded', async function() {
-    // Cargar datos desde Supabase
-    try {
-        console.log('Cargando datos desde Supabase...');
-        
-        // Cargar configuración
-        configEvaluacion = await cargarConfiguracionEvaluacionLocal();
+    // Inicializar con valores por defecto primero (para mostrar la página inmediatamente)
+    if (!configEvaluacion) {
+        configEvaluacion = getConfiguracionDefault();
         itemsProducto = configEvaluacion.itemsProducto || [];
         itemsServicio = configEvaluacion.itemsServicio || [];
+    }
+    
+    // Mostrar la página con valores por defecto
+    actualizarInformacionDesdeConfig();
+    inicializarEvaluadores();
+    inicializarEventos();
+    mostrarPaso(0);
+    
+    // Cargar datos desde Supabase (solo para verificar si hay cambios)
+    try {
+        console.log('Verificando datos desde Supabase...');
+        
+        // Cargar configuración
+        const configDesdeBD = await cargarConfiguracionEvaluacionLocal();
+        
+        // Solo actualizar si hay cambios o si no tenemos datos
+        if (configDesdeBD && (JSON.stringify(configDesdeBD) !== JSON.stringify(configEvaluacion) || !configEvaluacion.titulo)) {
+            configEvaluacion = configDesdeBD;
+            itemsProducto = configEvaluacion.itemsProducto || [];
+            itemsServicio = configEvaluacion.itemsServicio || [];
+            
+            // Actualizar la información solo si hubo cambios
+            actualizarInformacionDesdeConfig();
+        }
         
         // Cargar asignaciones y evaluadores
         asignacionProveedores = await cargarAsignacionProveedores();
-        evaluadores = await cargarEvaluadores();
+        const evaluadoresDesdeBD = await cargarEvaluadores();
         
-        // Si no hay evaluadores en Supabase, usar los de las asignaciones
-        if (evaluadores.length === 0) {
+        // Actualizar evaluadores solo si hay cambios
+        if (evaluadoresDesdeBD.length > 0) {
+            evaluadores = evaluadoresDesdeBD;
+            inicializarEvaluadores();
+        } else if (Object.keys(asignacionProveedores).length > 0) {
             evaluadores = Object.keys(asignacionProveedores);
+            inicializarEvaluadores();
         }
         
         // Cargar evaluaciones para obtener años disponibles
@@ -163,23 +354,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Inicializar selector de años
         await inicializarSelectorAnios(evaluaciones);
         
-        console.log('✅ Datos cargados desde Supabase');
+        console.log('✅ Datos verificados desde Supabase');
     } catch (error) {
-        console.error('Error al cargar datos desde Supabase, usando valores por defecto:', error);
-        // Usar valores por defecto
-        configEvaluacion = getConfiguracionDefault();
-        itemsProducto = configEvaluacion.itemsProducto || [];
-        itemsServicio = configEvaluacion.itemsServicio || [];
-        evaluadores = Object.keys(asignacionProveedores);
-        
-        // Inicializar selector de años sin evaluaciones
-        await inicializarSelectorAnios([]);
+        console.error('Error al verificar datos desde Supabase, usando valores por defecto:', error);
+        // Si hay error, mantener los valores por defecto que ya están cargados
     }
-    
-    // Continuar con la inicialización normal
-    actualizarInformacionDesdeConfig();
-    inicializarEvaluadores();
-    inicializarEventos();
 });
 
 // Inicializar calendario (input type="date" nativo)
@@ -195,6 +374,12 @@ async function inicializarSelectorAnios(evaluaciones) {
 }
 
 function actualizarInformacionDesdeConfig() {
+    // Verificar que configEvaluacion existe
+    if (!configEvaluacion) {
+        console.warn('configEvaluacion no está disponible aún');
+        return;
+    }
+    
     // Actualizar título
     const titulo = document.getElementById('tituloPrincipal');
     if (titulo) {
@@ -281,6 +466,13 @@ function inicializarEventos() {
     document.getElementById('proveedor').addEventListener('change', function() {
         mostrarItemsEvaluacion();
         mostrarCampoCorreo();
+        // Si estamos en el paso 2, asegurar que el correo se muestre
+        if (pasoActual === 2) {
+            const correoSection = document.getElementById('correoSection');
+            if (this.value && correoSection) {
+                correoSection.style.display = 'block';
+            }
+        }
     });
 
     // Cambio en respuestas
@@ -403,10 +595,11 @@ function actualizarEstadoRadioButtons(radioSeleccionado) {
 
 function mostrarCampoCorreo() {
     const proveedor = document.getElementById('proveedor').value;
-    if (proveedor) {
-        document.getElementById('correoSection').style.display = 'block';
-    } else {
-        document.getElementById('correoSection').style.display = 'none';
+    const correoSection = document.getElementById('correoSection');
+    if (proveedor && correoSection) {
+        correoSection.style.display = 'block';
+    } else if (correoSection) {
+        correoSection.style.display = 'none';
         document.getElementById('correoProveedor').value = '';
     }
 }
@@ -482,9 +675,21 @@ function calcularResultado() {
     
     if (todosCompletos) {
         document.getElementById('resultadoFinal').textContent = resultadoPonderado.toFixed(2) + '%';
-        document.getElementById('resultSection').style.display = 'block';
+        // Solo mostrar el resultado si estamos en el paso 4
+        if (pasoActual === 4) {
+            const resultSection = document.getElementById('resultSection');
+            if (resultSection) {
+                resultSection.style.display = 'block';
+            }
+        }
     } else {
-        document.getElementById('resultSection').style.display = 'none';
+        // Si no están todos completos y estamos en paso 4, ocultar
+        if (pasoActual === 4) {
+            const resultSection = document.getElementById('resultSection');
+            if (resultSection) {
+                resultSection.style.display = 'none';
+            }
+        }
     }
 }
 
@@ -568,14 +773,51 @@ async function guardarEvaluacion() {
             await guardarEvaluacion(evaluacionData);
         }
         
-        alert('✅ Evaluación guardada exitosamente en la base de datos. Ahora está disponible desde cualquier lugar.');
+        // Mostrar modal de éxito
+        mostrarModalExito();
         limpiarFormulario();
         await actualizarProveedores();
+        // Volver al inicio (paso 0) después de cerrar el modal
+        setTimeout(() => {
+            mostrarPaso(0);
+        }, 500);
     } catch (error) {
         console.error('Error al guardar evaluación:', error);
         alert('❌ Error al guardar la evaluación. Por favor, intente nuevamente.');
     }
 }
+
+// Función para mostrar el modal de éxito
+function mostrarModalExito() {
+    const modal = document.getElementById('successModal');
+    if (modal) {
+        modal.classList.add('show');
+    }
+}
+
+// Función para cerrar el modal de éxito
+function cerrarModalExito() {
+    const modal = document.getElementById('successModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+}
+
+// Hacer funciones globales
+window.mostrarModalExito = mostrarModalExito;
+window.cerrarModalExito = cerrarModalExito;
+
+// Cerrar modal al hacer clic fuera de él
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('successModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                cerrarModalExito();
+            }
+        });
+    }
+});
 
 function limpiarFormulario() {
     document.getElementById('evaluationForm').reset();
@@ -592,6 +834,9 @@ function limpiarFormulario() {
         const hoy = new Date();
         anioInput.value = hoy.toISOString().split('T')[0];
     }
+    
+    // Volver al paso inicial
+    mostrarPaso(0);
 }
 
 async function eliminarEvaluacionPorId(id) {

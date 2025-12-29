@@ -181,8 +181,13 @@ async function inicializarDatosPorDefecto() {
         console.log('✅ Configuración guardada');
 
         console.log('✅ Datos por defecto inicializados correctamente');
-        alert('✅ Datos iniciales cargados en la base de datos. Recargando página...');
-        window.location.reload();
+        alert('✅ Datos iniciales cargados en la base de datos.');
+        // Recargar solo la configuración sin recargar toda la página
+        configuracion = await cargarConfiguracion();
+        await inicializarFormulario();
+        // Recargar solo la configuración sin recargar toda la página
+        configuracion = await cargarConfiguracion();
+        await inicializarFormulario();
     } catch (error) {
         console.error('Error al inicializar datos por defecto:', error);
         alert('⚠️ Error al inicializar datos por defecto: ' + error.message);
@@ -196,10 +201,11 @@ async function inicializar() {
         // Inicializar eventos primero (no bloquea)
         inicializarEventos();
         
-        // Cargar formulario inmediatamente (sin esperar datos por defecto)
+        // Cargar formulario inmediatamente con datos disponibles
         await inicializarFormulario();
         
         // Verificar datos por defecto en segundo plano (no bloquea la UI)
+        // Solo se ejecuta si no hay datos, y no recarga la página
         inicializarDatosPorDefecto().catch(err => {
             console.error('Error al inicializar datos por defecto:', err);
         });
